@@ -24,11 +24,11 @@ void main()
 
 	sockaddr_in RecvAddr;
 
-	int Port = 8899;
+	int Port = 8080;
 
 	int BufLen = 64;
 
-	const char* IP_ADDRESS_S = "10.5.3.230";
+	const char* IP_ADDRESS_S = "127.0.0.1";
 
 	WSAStartup(MAKEWORD(2, 2), &wsaData);
 
