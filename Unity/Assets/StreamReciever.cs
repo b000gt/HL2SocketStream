@@ -19,22 +19,23 @@ public class StreamReciever : MonoBehaviour
     public TextMesh DebugText;
     public int Port;
 
+    string debugMessage = String.Empty;
     string counter = String.Empty;
     // Start is called before the first frame update
     async void Start()
     {
 #if !UNITY_EDITOR
-        DebugText.text = "Starting...";
+        debugMessage = "Starting...";
         DatagramSocket socket = new DatagramSocket();
         socket.MessageReceived += MessageRecieved;
         try
         {
             await socket.BindEndpointAsync(null, Port.ToString());
-            DebugText.text = "Socket Bound";
+            debugMessage += "\nSocket Bound";
         }
         catch (Exception ex)
         {
-            DebugText.text = ex.ToString();
+            debugMessage = "\n" + ex.ToString();
             Debug.Log(ex.ToString());
         }
 #endif
@@ -46,17 +47,18 @@ public class StreamReciever : MonoBehaviour
     void Update()
     {
         TextObject.text = counter;
+        DebugText.text = debugMessage;
     }
 
 #if !UNITY_EDITOR
-    void MessageRecieved(DatagramSocket sender, DatagramSocketMessageReceivedEventArgs args)
+    private async void MessageRecieved(DatagramSocket sender, DatagramSocketMessageReceivedEventArgs args)
     {
         using (var reader = args.GetDataReader())
         {
             var buf = new byte[reader.UnconsumedBufferLength];
             reader.ReadBytes(buf);
             string message = Encoding.UTF8.GetString(buf);
-            TextObject.text = message;
+            counter += "\n" + message;
         }
     }
 #endif

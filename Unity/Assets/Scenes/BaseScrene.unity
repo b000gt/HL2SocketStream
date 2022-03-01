@@ -135,7 +135,6 @@ GameObject:
   - component: {fileID: 39517126}
   - component: {fileID: 39517125}
   - component: {fileID: 39517124}
-  - component: {fileID: 39517123}
   - component: {fileID: 39517122}
   - component: {fileID: 39517121}
   - component: {fileID: 39517120}
@@ -217,21 +216,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   autoConstraintSelection: 1
   selectedConstraints: []
---- !u!114 &39517123
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 39517119}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e838a2335d665ad4a8f395ee34165e45, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  TextObject: {fileID: 1983915094}
-  DebugText: {fileID: 0}
-  Port: 8899
 --- !u!65 &39517124
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -302,8 +286,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 39517119}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -0.2, y: -0.1, z: 0.5}
-  m_LocalScale: {x: 0.1, y: 0.1, z: 0.1}
+  m_LocalPosition: {x: -0.234, y: -0.1, z: 0.5}
+  m_LocalScale: {x: 0.3, y: 0.1, z: 0.01}
   m_Children:
   - {fileID: 1983915096}
   m_Father: {fileID: 0}
@@ -379,7 +363,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 861381907}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -0.327, y: 0.408, z: -0.57}
+  m_LocalPosition: {x: -0.303, y: 0.09, z: -0.57}
   m_LocalScale: {x: 0.1, y: 0.1, z: 0.1}
   m_Children: []
   m_Father: {fileID: 1967848476}
@@ -711,7 +695,7 @@ Transform:
   m_GameObject: {fileID: 1967848472}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: -0.1, z: 0.5}
-  m_LocalScale: {x: 0.1, y: 0.1, z: 0.1}
+  m_LocalScale: {x: 0.1, y: 0.1, z: 0.01}
   m_Children:
   - {fileID: 861381908}
   m_Father: {fileID: 0}
@@ -731,7 +715,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   TextObject: {fileID: 861381909}
   DebugText: {fileID: 1983915094}
-  Port: 8899
+  Port: 8080
 --- !u!114 &1967848478
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -831,7 +815,7 @@ TextMesh:
   m_GameObject: {fileID: 1983915093}
   m_Text: 'Debug:'
   m_OffsetZ: 0
-  m_CharacterSize: 1
+  m_CharacterSize: 0.5
   m_LineSpacing: 1
   m_Anchor: 0
   m_Alignment: 0
@@ -892,8 +876,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1983915093}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -0.327, y: 0.408, z: -0.57}
-  m_LocalScale: {x: 0.1, y: 0.1, z: 0.1}
+  m_LocalPosition: {x: -0.465, y: 0.451, z: -0.57}
+  m_LocalScale: {x: 0.033333, y: 0.1, z: 0.1}
   m_Children: []
   m_Father: {fileID: 39517127}
   m_RootOrder: 0
