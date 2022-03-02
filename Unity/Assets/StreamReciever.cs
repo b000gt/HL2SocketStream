@@ -9,10 +9,6 @@ using System.Text;
 using System.Threading.Tasks;
 using System;
 
-#if !UNITY_EDITOR
-    using Windows.Networking.Sockets;
-#endif
-
 public class StreamReciever : MonoBehaviour
 {
     public TextMesh TextObject;
@@ -22,25 +18,10 @@ public class StreamReciever : MonoBehaviour
     string debugMessage = String.Empty;
     string counter = String.Empty;
     // Start is called before the first frame update
-    async void Start()
+    void Start()
     {
-#if !UNITY_EDITOR
-        debugMessage = "Starting...";
-        DatagramSocket socket = new DatagramSocket();
-        socket.MessageReceived += MessageRecieved;
-        try
-        {
-            await socket.BindEndpointAsync(null, Port.ToString());
-            debugMessage += "\nSocket Bound";
-        }
-        catch (Exception ex)
-        {
-            debugMessage = "\n" + ex.ToString();
-            Debug.Log(ex.ToString());
-        }
-#endif
-        counter = TextObject.text;
-        // Task.Run(() => { Listen(); });
+        Debug.Log("Start sending...");
+        SendUDPData("10.5.1.50", 28250, "This is UDP Test");
     }
 
     // Update is called once per frame
@@ -50,44 +31,37 @@ public class StreamReciever : MonoBehaviour
         DebugText.text = debugMessage;
     }
 
-#if !UNITY_EDITOR
-    private async void MessageRecieved(DatagramSocket sender, DatagramSocketMessageReceivedEventArgs args)
-    {
-        using (var reader = args.GetDataReader())
-        {
-            var buf = new byte[reader.UnconsumedBufferLength];
-            reader.ReadBytes(buf);
-            string message = Encoding.UTF8.GetString(buf);
-            counter += "\n" + message;
-        }
-    }
-#endif
+    void SendUDPData(string ServerIP, int Port, string Mess)
 
-    void Listen()
     {
-        UdpClient client = null;
+
+        UdpClient client = new UdpClient(ServerIP, Port);
+
+        byte[] SendPacket = Encoding.ASCII.GetBytes(Mess);
+
         try
+
         {
-            client = new UdpClient(Port);
+            client.Send(SendPacket, SendPacket.Length);
+
+            debugMessage += $"Sent {SendPacket.Length} bytes to the server";
+
         }
+
         catch (Exception ex)
+
         {
-            Console.WriteLine(ex.Message);
+
+            debugMessage += ex.Message;
+
         }
-        IPEndPoint RemoteServer = new IPEndPoint(IPAddress.Any, 0);
-        for(; ; )
-        {
-            try
-            {
-                byte[] RecPacket = client.Receive(ref RemoteServer);
-                var message = Encoding.ASCII.GetString(RecPacket).ToString();
-                Debug.Log($"Message: {message}");
-                counter = message;
-            }
-            catch (Exception ex)
-            {
-                Debug.Log(ex.Message);
-            }
-        }
+
+        IPEndPoint RemoteIpEndPoint = new IPEndPoint(IPAddress.Any, 0);
+        Byte[] receiveBytes = client.Receive(ref RemoteIpEndPoint);
+        string returnData = Encoding.ASCII.GetString(receiveBytes);
+        debugMessage += "This is the message you received: " +
+                                  returnData;
+
+        client.Close();
     }
 }
