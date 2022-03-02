@@ -75,7 +75,6 @@ namespace UDPClient
                 client.PackageReceived += OnMessageReceived;
                 Console.ReadLine();
             }
-
         }
 
         static void OnMessageReceived(object sender, EventArgs args)

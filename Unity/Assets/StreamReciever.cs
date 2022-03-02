@@ -6,7 +6,7 @@ using UnityEngine.UI;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
-using System.Threading.Tasks;
+using System.Threading;
 using System;
 
 public class StreamReciever : MonoBehaviour
@@ -21,7 +21,8 @@ public class StreamReciever : MonoBehaviour
     void Start()
     {
         Debug.Log("Start sending...");
-        SendUDPData("10.5.1.50", 28250, "This is UDP Test");
+        var client = new UdpStreamingClient("10.5.1.50", 28250);
+        client.PackageReceived += OnMessageReceived;
     }
 
     // Update is called once per frame
@@ -31,37 +32,66 @@ public class StreamReciever : MonoBehaviour
         DebugText.text = debugMessage;
     }
 
-    void SendUDPData(string ServerIP, int Port, string Mess)
-
+    void OnMessageReceived(object sender, EventArgs args)
     {
-
-        UdpClient client = new UdpClient(ServerIP, Port);
-
-        byte[] SendPacket = Encoding.ASCII.GetBytes(Mess);
-
-        try
-
+        if (args is UdpStreamMessageReceivedEventArgs)
         {
-            client.Send(SendPacket, SendPacket.Length);
-
-            debugMessage += $"Sent {SendPacket.Length} bytes to the server";
-
+            counter = (args as UdpStreamMessageReceivedEventArgs).Message;
         }
-
-        catch (Exception ex)
-
-        {
-
-            debugMessage += ex.Message;
-
-        }
-
-        IPEndPoint RemoteIpEndPoint = new IPEndPoint(IPAddress.Any, 0);
-        Byte[] receiveBytes = client.Receive(ref RemoteIpEndPoint);
-        string returnData = Encoding.ASCII.GetString(receiveBytes);
-        debugMessage += "This is the message you received: " +
-                                  returnData;
-
-        client.Close();
     }
+}
+
+public class UdpStreamingClient : IDisposable
+{
+    public event EventHandler PackageReceived;
+    private UdpClient server;
+    private IPEndPoint remoteIpEndPoint = new IPEndPoint(IPAddress.Any, 0);
+    private CancellationTokenSource cancellationToken;
+    public UdpStreamingClient(string serverIp, int serverPort)
+    {
+        cancellationToken = new CancellationTokenSource();
+        server = new UdpClient(serverIp, serverPort);
+        ThreadPool.QueueUserWorkItem(new WaitCallback(KeepAlive), cancellationToken.Token);
+        ThreadPool.QueueUserWorkItem(new WaitCallback(Listen), cancellationToken.Token);
+    }
+
+    public void Dispose()
+    {
+        cancellationToken.Cancel();
+        cancellationToken.Dispose();
+        server.Close();
+    }
+
+    public void Listen(object cancellationToken)
+    {
+        var token = (CancellationToken)cancellationToken;
+        while (!token.IsCancellationRequested)
+        {
+            try
+            {
+                Byte[] receiveBytes = server.Receive(ref remoteIpEndPoint);
+                string returnData = Encoding.ASCII.GetString(receiveBytes);
+                PackageReceived?.Invoke(this, new UdpStreamMessageReceivedEventArgs() { Message = returnData });
+            }
+            catch (SocketException ex)
+            {
+                continue;
+            }
+        }
+    }
+
+    private void KeepAlive(object cancellationToken)
+    {
+        var token = (CancellationToken)cancellationToken;
+        while (!token.IsCancellationRequested)
+        {
+            byte[] SendPacket = Encoding.ASCII.GetBytes("KEEPALIVE");
+            server.Send(SendPacket, SendPacket.Length);
+            Thread.Sleep(1000);
+        }
+    }
+}
+public class UdpStreamMessageReceivedEventArgs : EventArgs
+{
+    public string Message { get; set; }
 }
