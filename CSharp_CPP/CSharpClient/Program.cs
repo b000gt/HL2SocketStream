@@ -3,6 +3,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading;
+using System.Globalization;
 
 namespace UDPClient
 
@@ -81,7 +82,27 @@ namespace UDPClient
         {
             if(args is UdpStreamMessageReceivedEventArgs)
             {
-                Console.WriteLine($"Message Received: {(args as UdpStreamMessageReceivedEventArgs).Message}");
+                var matrix = new float[4,4];
+                var message = (args as UdpStreamMessageReceivedEventArgs).Message;
+                var rows = message.Split("\n");
+                for(var i = 0; i < 4; i++)
+                {
+                    var row = rows[i].Split("\t");
+                    for(var j = 0; j < 4; j++)
+                    {
+                        matrix[i, j] = float.Parse(row[j], CultureInfo.InvariantCulture);
+                    }
+                }
+
+                Console.WriteLine("Message received:\n");
+                for(int i = 0; i < 4; i++)
+                {
+                    for(var j = 0; j < 4; j++)
+                    {
+                        Console.Write($"{matrix[i, j]}\t");
+                    }
+                    Console.Write("\n");
+                }
             }
         }
 

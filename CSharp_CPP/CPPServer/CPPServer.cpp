@@ -9,7 +9,7 @@
 
 std::string test_reply = "test reply";
 
-const int BUFFER_LENGTH = 1024;
+const int BUFFER_LENGTH = 512;
 
 class UdpStreamingServer {
 public:
@@ -22,11 +22,21 @@ public:
 		this->RecvAddr.sin_port = htons(Port);
 		this->RecvAddr.sin_addr.s_addr = htonl(INADDR_ANY);
 		bind(this->RecvSocket, (SOCKADDR*)&this->RecvAddr, sizeof(this->RecvAddr));
+		this->ThreadIsAlive = true;
+		//TODO start keepalive thread
 	}
 	~UdpStreamingServer() {
+		//TODO stop keepalive thread
 		closesocket(RecvSocket);
 		WSACleanup();
 	}
+
+	void revieveKeepAlive() {
+		while (this->ThreadIsAlive) {
+			receive();
+		}
+	}
+
 	char* receive() {
 		char RecvBuf[BUFFER_LENGTH];
 		recvfrom(this->RecvSocket, RecvBuf, BUFFER_LENGTH, 0, (SOCKADDR*)&this->SenderAddr, &this->SenderAddrSize);
@@ -46,23 +56,44 @@ private:
 	int Port;
 	sockaddr_in SenderAddr;
 	int SenderAddrSize;
+	std::thread KeepAliveThread;
+	bool ThreadIsAlive;
 };
 
 
 int main()
 {
+	float matrix[4][4]{
+		{0, 0, 0, 0.00001},
+		{0, 0, 0, 0.00001},
+		{0, 0, 0, -0.001},
+		{0, 0, 0, 1} };
+	std::stringstream matrix_string;
+	for (int i = 0; i < 4; i++)
+	{
+		for (int j = 0; j < 4; j++) {
+			matrix_string << matrix[i][j] << "\t";
+		}
+		matrix_string << "\n";
+	}
 	UdpStreamingServer server(28250);
 	time_t last_kl_received = 0;
+	std::cout << "Waiting for Client...\n";
+	std::string kl_signal;
+	while (!kl_signal.starts_with("KEEPALIVE")) {
+		kl_signal = server.receive();
+	}
 	for (int i = 0; i < 200000; i++) {
-		if (std::time(0) - last_kl_received > 2) {
+		/*if (std::time(0) - last_kl_received > 2) {
 			std::cout << "Waiting for Client...\n";
 			std::string kl_signal;
 			while (!kl_signal.starts_with("KEEPALIVE")) {
 				kl_signal = server.receive();
 			}
 			last_kl_received = std::time(0);
-		}
-		std::cout << "Sending: " << i << "\n";
-		server.send(std::to_string(i));
+		}*/
+		std::this_thread::sleep_for(std::chrono::milliseconds(10));
+		std::cout << "Sending:\n" << matrix_string.str() << "\n";
+		server.send(matrix_string.str());
 	}
 }

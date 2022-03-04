@@ -8,20 +8,23 @@ using System.Net.Sockets;
 using System.Text;
 using System.Threading;
 using System;
+using System.Globalization;
 
 public class StreamReciever : MonoBehaviour
 {
     public TextMesh TextObject;
     public TextMesh DebugText;
+    public GameObject ObjectTransformed;
     public int Port;
 
+    float[,] transformationMatrix = new float[4, 4];
     string debugMessage = String.Empty;
     string counter = String.Empty;
     // Start is called before the first frame update
     void Start()
     {
         Debug.Log("Start sending...");
-        var client = new UdpStreamingClient("10.5.1.50", 28250);
+        var client = new UdpStreamingClient("10.5.1.34", 28250);
         client.PackageReceived += OnMessageReceived;
     }
 
@@ -30,6 +33,11 @@ public class StreamReciever : MonoBehaviour
     {
         TextObject.text = counter;
         DebugText.text = debugMessage;
+        transform.Translate(
+            transformationMatrix[0, 3],
+            transformationMatrix[1, 3],
+            transformationMatrix[2, 3]);
+        transformationMatrix = new float[4, 4];
     }
 
     void OnMessageReceived(object sender, EventArgs args)
@@ -37,6 +45,17 @@ public class StreamReciever : MonoBehaviour
         if (args is UdpStreamMessageReceivedEventArgs)
         {
             counter = (args as UdpStreamMessageReceivedEventArgs).Message;
+
+            var message = (args as UdpStreamMessageReceivedEventArgs).Message;
+            var rows = message.Split('\n');
+            for (var i = 0; i < 4; i++)
+            {
+                var row = rows[i].Split('\t');
+                for (var j = 0; j < 4; j++)
+                {
+                    transformationMatrix[i, j] = float.Parse(row[j], CultureInfo.InvariantCulture);
+                }
+            }
         }
     }
 }
